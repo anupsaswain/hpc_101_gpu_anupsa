@@ -64,3 +64,31 @@ function get_backend(use_gpu=true)
     end
     return to, backend
 end
+
+
+"""
+    benchmark_wave(sim_fn)
+
+Benchmarks a wave simulation function `sim_fn` (e.g., `simulate_wave`
+or `my_simulate_wave`) for `nt` time steps.
+
+1. Compiles the kernel by running once
+2. Runs the kernel multiple times
+3. Reports average wall time
+"""
+function benchmark_wave(sim_fn, repeats=5)
+    # Warmup
+    sim_fn()
+
+    walltime = 0.0
+
+    for i in 1:repeats
+        stats = @timed sim_fn()
+        @info "Wave sim run $i: $(stats.time) seconds"
+        walltime += stats.time
+    end
+
+    @info "Average wave simulation time: $(walltime / repeats) seconds"
+
+    return nothing
+end
