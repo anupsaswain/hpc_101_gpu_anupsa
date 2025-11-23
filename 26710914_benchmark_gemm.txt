@@ -1,0 +1,24 @@
+┌ Warning: Circular dependency detected. Precompilation will be skipped for:
+│   SpecialFunctionsExt [1285c0f1-ff9f-5867-b66e-0f359bcf09ba]
+│   GPUArrays [0c68f7d7-f131-5f86-a1c3-88cf8149b2d7]
+│   KernelAbstractions [63c18a36-062a-441e-b654-da1e3ab1ce7c]
+│   StructArraysAdaptExt [f04e5bcb-ab32-5a64-8b64-c2cc4abec66e]
+│   CairoMakie [13f3f980-e62b-5c42-98c6-ff1f3baf88f0]
+│   StructArraysSparseArraysExt [d5b9410b-929f-5d61-aab8-0598522fd334]
+│   CUDA [052768ef-5323-5732-b1bb-66c8b64840ba]
+│   StructArraysStaticArraysExt [d1e1e8be-46cf-5459-abb8-be6c7518b661]
+│   SparseArraysExt [85068d23-b5fb-53f1-8204-05c2aba6942f]
+│   StructArraysGPUArraysCoreExt [cbbf52aa-d660-55d4-8a5a-33845bbaa85d]
+│   AtomixCUDAExt [13011619-4c7c-5ef0-948f-5fc81565cd05]
+│   Makie [ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a]
+│   LinearAlgebraExt [66d79d19-2cc4-5b0b-ac7a-b340256d1ecd]
+│   ChainRulesCoreExt [eae2faf6-b232-58cb-a410-7764fda2830c]
+│   StructArraysLinearAlgebraExt [084ded39-0575-5459-ba0f-7a4568fdaad8]
+└ @ Pkg.API /sw/pkgs/lsa/julia/1.10.2/share/julia/stdlib/v1.10/Pkg/src/API.jl:1239
+[ Info: Running benchmark for N = 4096
+[ Info: Wall time for run 1: 0.181465217 seconds
+[ Info: Wall time for run 2: 0.189336728 seconds
+[ Info: Wall time for run 3: 0.191007289 seconds
+[ Info: Wall time for run 4: 0.183768874 seconds
+[ Info: Wall time for run 5: 0.18389983 seconds
+[ Info: Average wall time: 0.1858955876 seconds
