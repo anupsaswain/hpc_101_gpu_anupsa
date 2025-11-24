@@ -1,4 +1,4 @@
-using GLMakie  # You'll need to install this package (`pkg> add GLMakie`)
+using CairoMakie  # You'll need to install this package (`pkg> add GLMakie`)
 # On Artemis, modify the function to generate static plots using CarioMakie instead
 
 """

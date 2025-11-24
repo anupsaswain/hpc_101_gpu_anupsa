@@ -78,8 +78,10 @@ or `my_simulate_wave`) for `nt` time steps.
 """
 function benchmark_wave(sim_fn, repeats=5)
     # Warmup
-    sim_fn()
-
+    for i in 1:repeats
+        sim_fn()
+    end
+    
     walltime = 0.0
 
     for i in 1:repeats

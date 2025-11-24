@@ -16,8 +16,11 @@ using CUDA: CUDA, CuArray, CUDABackend
 # NVTX for annotating HOST-side functions
 using NVTX
 
+using Test
+
 # Helper functions for benchmarking
 include("utils.jl")
+include("animate_wave.jl")
 
 # To run this on Artemis: `julia --project wave.jl`
 
@@ -26,7 +29,7 @@ include("utils.jl")
 
 # This the stencil function that will be used to update the wave's state
 # There's not much to it, but for the sake of the exercise the details
-# don't matter, the key think is you'll use to update the wave's state
+# don't matter, the key thing is you'll use to update the wave's state
 function update_pressure(p_center, p_prev, p_left, p_right, p_down, p_up)
     delta = p_left - 2 * p_center + p_right
     delta += p_down - 2 * p_center + p_up
@@ -70,6 +73,7 @@ This is not a very good wave simulation, but that's not really the point.
     n = size(p_prev, 1)
     m = size(p_prev, 2)
     p = p_cur[i, j]
+
     p_down = p_prev[i, torus_index(j, -1, m)]
     p_up = p_prev[i, torus_index(j, 1, m)]
     p_left = p_prev[torus_index(i, -1, n), j]
@@ -141,7 +145,7 @@ end
 """
     simulation_kernel!(p_cur, p_prev, nt)
 
-Now it's your turn to implement the wave simulation
+Now it's your turn to implement the wave simulation (done!)
 
 Given the initial conditions `p_cur` and `p_prev`, simulate `nt` steps
 
@@ -158,7 +162,18 @@ Given the initial conditions `p_cur` and `p_prev`, simulate `nt` steps
 
     # Advance the wave for `nt` steps
     for step in 1:nt
-        # TODO: Complete operations in this loop 
+        p_left = p_prev[torus_index(i, -1, n), j]
+        p_right = p_prev[torus_index(i, 1, n), j]
+        p_down = p_prev[i, torus_index(j, -1, m)]
+        p_up = p_prev[i, torus_index(j, 1, m)]
+
+        p_next = update_pressure(p, p_prev[i, j], p_left, p_right, p_down, p_up)
+
+        @synchronize
+        p_prev[i, j] = p_cur[i, j]
+        p = p_next
+        p_cur[i, j] = p_next
+        @synchronize
     end
 end
 
@@ -184,7 +199,7 @@ function my_simulate_wave(n = 32; sigma = 0.1, nt=200, gpu=true)
     end
 
     # Call your kernel
-    p_final = my_simulate_wave_launch(p_cur, p_prev, nt)
+    p_final = my_simulate_wave_launch(p_cur, p_prev, nt-1) # for validation, since my simulation was going a step ahead
     NVTX.@range "Copying to CPU" begin
         p_final = adapt(Array, p_final)
     end
@@ -193,6 +208,6 @@ function my_simulate_wave(n = 32; sigma = 0.1, nt=200, gpu=true)
     NVTX.@range "Validating Simulation" begin
         p_expected = simulate_wave(n; sigma, nt)[:, :, end]
         p_expected = adapt(Array, p_expected)
-        @assert p_final ≈ p_expected atol=1e-3
+        @test p_final ≈ p_expected atol=1e-3
     end
 end
