@@ -4,4 +4,3 @@
 include("wave.jl")
 @info "Running benchmark for wave simulation"
 benchmark_wave(simulate_wave)
-

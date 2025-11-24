@@ -150,12 +150,12 @@ Now it's your turn to implement the wave simulation (done!)
 Given the initial conditions `p_cur` and `p_prev`, simulate `nt` steps
 
 """
-@kernel function simulation_kernel!(p_cur, p_prev, nt)
+@kernel function simulation_kernel!(p_cur, p_prev, nt, n, m)
     i, j = @index(Global, NTuple)
 
-    # Get the dimensions of the grid
-    n = size(p_prev, 1)
-    m = size(p_prev, 2)
+    # # Get the dimensions of the grid
+    # n = size(p_prev, 1)
+    # m = size(p_prev, 2)
 
     # Initialize the current pressure value
     p = p_cur[i, j]
@@ -166,7 +166,6 @@ Given the initial conditions `p_cur` and `p_prev`, simulate `nt` steps
         p_right = p_prev[torus_index(i, 1, n), j]
         p_down = p_prev[i, torus_index(j, -1, m)]
         p_up = p_prev[i, torus_index(j, 1, m)]
-
         p_next = update_pressure(p, p_prev[i, j], p_left, p_right, p_down, p_up)
 
         @synchronize
@@ -178,13 +177,13 @@ Given the initial conditions `p_cur` and `p_prev`, simulate `nt` steps
 end
 
 # Launcher for the simulation kernel
-NVTX.@annotate function my_simulate_wave_launch(p_next::AbstractArray{Float32}, p_prev::AbstractArray{Float32}, nt::Int64)
+NVTX.@annotate function my_simulate_wave_launch(p_next::AbstractArray{Float32}, p_prev::AbstractArray{Float32}, nt::Int64, n::Int64, m::Int64)
     # Setup the kernel
     backend = KernelAbstractions.get_backend(p_next)
-    kernel! = simulation_kernel!(backend)
+    kernel! = simulation_kernel!(backend, (n, m))
 
     # Launch the kernel
-    kernel!(p_next, p_prev, nt; ndrange=size(p_next))
+    kernel!(p_next, p_prev, nt, n, m; ndrange=size(p_next))
     return p_next
 end
 
@@ -199,7 +198,7 @@ function my_simulate_wave(n = 32; sigma = 0.1, nt=200, gpu=true)
     end
 
     # Call your kernel
-    p_final = my_simulate_wave_launch(p_cur, p_prev, nt-1) # for validation, since my simulation was going a step ahead
+    p_final = my_simulate_wave_launch(p_cur, p_prev, nt-1, n, n) # for validation, since my simulation was going a step ahead
     NVTX.@range "Copying to CPU" begin
         p_final = adapt(Array, p_final)
     end
@@ -208,6 +207,10 @@ function my_simulate_wave(n = 32; sigma = 0.1, nt=200, gpu=true)
     NVTX.@range "Validating Simulation" begin
         p_expected = simulate_wave(n; sigma, nt)[:, :, end]
         p_expected = adapt(Array, p_expected)
+        f = animate_wave(p_final)
+        save("test2.png", f)
+        g = animate_wave(p_expected)
+        save("test.png", g)
         @test p_final ≈ p_expected atol=1e-3
     end
 end

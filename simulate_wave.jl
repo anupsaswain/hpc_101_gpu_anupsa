@@ -4,6 +4,8 @@ n = 512
 sigma = 0.2
 nt = 200
 
+include("wave.jl")
+
 @info "Simulating wave on the GPU"
 @time simulate_wave(n; sigma, nt)
 
